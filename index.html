@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description"
+        content="Platform API untuk mengelola data pasien, dokter, dan appointment secara real-time">
+    <title>Hospital Management System - API Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- LANDING PAGE -->
+    <div id="landingPage">
+        <div class="landing-inner">
+            <span class="landing-emoji">🏥</span>
+            <h1>Hospital Management System <span>Client</span></h1>
+            <p class="landing-subtitle">Web client untuk menguji endpoint API Hospital Management System</p>
+            <p class="landing-desc">Anda bisa melakukan request API (GET, POST, PUT, DELETE) ke semua endpoint. Aktifkan
+                dengan memasukkan API KEY terlebih dahulu.</p>
+
+            <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+                <div class="landing-access-box"
+                    style="text-align: center; max-width: 750px; width: 100%; padding: 22px 35px;">
+                    <strong>📋 Syarat Penggunaan:</strong><br>
+                    Wajib memiliki <strong>API KEY</strong> dari Web API. Gunakan client ini untuk testing endpoint,
+                    melihat response JSON, dan mengelola data secara real-time.
+                </div>
+            </div>
+
+            <div class="landing-cta"
+                style="clear: both; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <button class="cta-login" onclick="showVerifyModal()">🔑 Masukkan API Key</button>
+
+                <!-- Button ke Web API - pakai class btn-webapi-landing -->
+                <a href="http://localhost/hospital_api/index.html" target="_blank" style="
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:14px 28px;
+      background:linear-gradient(135deg,#10b981,#059669);
+      color:white;
+      text-decoration:none;
+      border-radius:50px;
+      font-size:15px;
+      font-weight:700;
+      box-shadow:0 8px 20px rgba(16,185,129,0.3);
+      transition:all .3s ease;
+   " onmouseover="
+      this.style.transform='translateY(-3px) scale(1.03)';
+      this.style.boxShadow='0 12px 28px rgba(16,185,129,0.4)';
+   " onmouseout="
+      this.style.transform='translateY(0)';
+      this.style.boxShadow='0 8px 20px rgba(16,185,129,0.3)';
+   ">
+                    🚀 Kunjungi Web API
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Hospital Management System - API Documentation & Data Management © 2026</p>
+        <p style="font-size: 11px; margin-top: 5px;">
+            🔑 Dapatkan API Key di
+            <a href="http://localhost/hospital_api/index.html" target="_blank" style="color: #1a73e8;">Web API
+                Provider</a>
+        </p>
+    </div>
+
+    <!-- Modal Verifikasi API Key -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div id="verifyForm">
+                <h2>🔐 Verifikasi API Key</h2>
+                <p style="font-size: 13px; color: #666; text-align: center; margin-bottom: 20px;">
+                    Masukkan API Key yang didapat dari
+                    <a href="http://localhost/hospital_api/index.html" target="_blank" style="color: #1a73e8;">Web API
+                        Provider</a>
+                </p>
+                <div class="password-wrapper">
+                    <input type="password" id="apiKeyInput" placeholder="Masukkan API Key">
+                    <span class="password-toggle" onclick="togglePassword('apiKeyInput', this)">👁️</span>
+                </div>
+                <button onclick="verifyApiKey()">🔑 Verifikasi</button>
+                <div id="verifyError" class="error-msg"></div>
+                <div id="verifySuccess" class="success-msg" style="display:none;"></div>
+                <div class="switch-form" style="margin-top: 15px;">
+                    Belum punya API Key?
+                    <a href="http://localhost/hospital_api/index.html" target="_blank">Daftar di Web API</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ KONFIGURASI ============
+        const API_BASE = 'http://localhost/hospital_api';
+
+        // ============ SHOW MODAL ============
+        function showVerifyModal() {
+            document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('apiKeyInput').value = '';
+            document.getElementById('verifyError').innerHTML = '';
+            document.getElementById('verifySuccess').style.display = 'none';
+        }
+
+        function closeModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        // ============ TOGGLE PASSWORD ============
+        function togglePassword(inputId, el) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                el.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                el.textContent = '👁️';
+            }
+        }
+
+        // ============ VERIFIKASI API KEY ============
+        async function verifyApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const errorDiv = document.getElementById('verifyError');
+            const successDiv = document.getElementById('verifySuccess');
+            const btn = document.querySelector('#verifyForm button');
+
+            errorDiv.innerHTML = '';
+            successDiv.style.display = 'none';
+
+            if (!apiKey) {
+                errorDiv.innerHTML = '⚠️ API Key harus diisi!';
+                return;
+            }
+
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Memverifikasi...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/verify.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('apiKey', apiKey);
+                    localStorage.setItem('userData', JSON.stringify(result.user));
+
+                    successDiv.style.display = 'block';
+                    successDiv.innerHTML = '✅ Verifikasi berhasil! Mengalihkan ke dashboard...';
+
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    errorDiv.innerHTML = '❌ ' + (result.message || 'API Key tidak valid!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.innerHTML = '❌ Gagal terhubung ke server. Pastikan Web API berjalan di localhost.';
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) closeModal();
+        };
+
+        if (localStorage.getItem('apiKey') && localStorage.getItem('userData')) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+
+</body>
+
+</html>
